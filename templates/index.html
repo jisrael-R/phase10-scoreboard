@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Phase 10 Scoreboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <!-- Open Graph Meta -->
+    <meta property="og:title" content="Phase 10 Scoreboard">
+    <meta property="og:description" content="Keep score with style. Confetti. Sound. Winner animations.">
+    <meta property="og:image" content="/static/preview.png">
+    <meta property="og:url" content="https://yourdomain.com">
+
+    <!-- Twitter Card Meta -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Phase 10 Scoreboard">
+    <meta name="twitter:description" content="Track and celebrate your Phase 10 game like never before.">
+    <meta name="twitter:image" content="/static/preview.png">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+
+
+
+    <style>
+        :root {
+            --blue: #0051BA;
+            --dark-blue: #003B8E;
+            --yellow: #FFD500;
+            --white: #ffffff;
+            --red: #D7263D;
+            --green: #2ECC40;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--blue);
+            color: var(--white);
+            text-align: center;
+        }
+
+        .title-bar {
+            background-color: var(--dark-blue);
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .logo-image img {
+            max-width: 160px;
+            height: auto;
+        }
+
+        .rainbow-slash,
+        .card-strip {
+            display: flex;
+            gap: 6px;
+            margin-top: 1rem;
+        }
+
+        .slash {
+            width: 35px;
+            height: 6px;
+            border-radius: 5px;
+        }
+
+        .red {
+            background-color: #D7263D;
+        }
+
+        .blue {
+            background-color: #0074D9;
+        }
+
+        .green {
+            background-color: #2ECC40;
+        }
+
+        .yellow {
+            background-color: #FFDC00;
+        }
+
+        .card {
+            width: 40px;
+            height: 55px;
+            border-radius: 5px;
+            background-color: white;
+            color: #000;
+            font-weight: bold;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid;
+        }
+
+        .card.red {
+            border-color: #D7263D;
+        }
+
+        .card.blue {
+            border-color: #0074D9;
+        }
+
+        .card.green {
+            border-color: #2ECC40;
+        }
+
+        .card.yellow {
+            border-color: #FFDC00;
+        }
+
+        @media screen and (max-width: 600px) {
+
+            .rainbow-slash,
+            .card-strip {
+                display: none;
+            }
+
+            .title-bar {
+                flex-direction: column;
+            }
+
+            .logo-image img {
+                max-width: 120px;
+            }
+        }
+
+        .player-card {
+            position: relative;
+            background-color: var(--dark-blue);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem auto;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            background: #ff4d4d;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            z-index: 5;
+            transition: background 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            background: #cc0000;
+        }
+
+
+        .avatar {
+            background-color: var(--yellow);
+            color: var(--blue);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .player-info {
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        .name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .stats {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .add-player-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 90%;
+            margin: 1.5rem auto;
+        }
+
+        .custom-input input,
+        .add-player-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #003B8E;
+            /* background-color: #003B8E; */
+            border: 2px solid #cc0000;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .custom-input input::placeholder,
+        .add-player-input::placeholder {
+            color: #003B8E;
+        }
+
+        .add-player-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--yellow);
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--blue);
+            text-transform: uppercase;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .add-player-btn:hover {
+            background-color: #ffce00;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: white;
+            margin: 10px 0;
+        }
+
+        .custom-checkbox input {
+            display: none;
+        }
+
+        .custom-checkbox .checkmark {
+            width: 20px;
+            height: 20px;
+            background-color: transparent;
+            border: 2px solid #FFD500;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .custom-checkbox input:checked+.checkmark::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 6px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--yellow);
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--blue);
+            text-transform: uppercase;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .start-over {
+            background-color: var(--red);
+            color: white;
+            margin: 1.5rem auto;
+            max-width: 500px;
+        }
+
+        .start-over:hover {
+            background-color: #b71c1c;
+        }
+
+        .warning {
+            font-weight: bold;
+            color: var(--yellow);
+            margin-top: 1rem;
+        }
+
+        .log-toggle-btn {
+            margin: 2rem auto 1rem;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: var(--yellow);
+            color: var(--blue);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .history-container {
+            max-width: 600px;
+            margin: auto;
+            background: #002e70;
+            border: 2px solid var(--yellow);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: left;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #FFD50055;
+            padding-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .swal-popup {
+            font-family: 'Segoe UI', sans-serif;
+            text-align: left;
+            background: #002e70;
+            color: white;
+            border-radius: 12px;
+        }
+
+        .swal-confirm {
+            background: #FFD500 !important;
+            color: #003B8E !important;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+
+        .floating-log-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #FFD500;
+            color: #003B8E;
+            border: none;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 999;
+            transition: background 0.2s ease;
+        }
+
+        .floating-log-btn:hover {
+            background-color: #ffc107;
+        }
+
+        .swal-cancel {
+            background: #ff4d4d !important;
+            color: white !important;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+
+        .player-grid {
+            display: grid;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .player-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+        }
+
+        .floating-reset-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #ffc107;
+            color: #003B8E;
+            border: none;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 999;
+            transition: background 0.2s ease;
+        }
+
+        .startover-icon {
+            width: 28px;
+            height: 28px;
+        }
+
+        .floating-reset-btn:hover {
+            background-color: #ffc107;
+            animation: spin 0.6s ease-in-out;
+            transform: scale(1.1);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .player-card {
+            animation: flipIn 0.6s ease forwards;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes flipIn {
+            from {
+                transform: rotateY(90deg);
+                opacity: 0;
+            }
+
+            to {
+                transform: rotateY(0);
+                opacity: 1;
+            }
+        }
+
+        .warning {
+            font-weight: bold;
+            color: var(--yellow);
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .animate-warn.flash {
+            animation: flashColor 0.8s ease-in-out 2;
+        }
+
+        @keyframes flashColor {
+
+            0%,
+            100% {
+                color: #FFD500;
+            }
+
+            50% {
+                color: #FF4D4D;
+            }
+        }
+
+        .player-card.disabled {
+            opacity: 0.6;
+            filter: grayscale(100%);
+            position: relative;
+        }
+
+        .player-card.disabled::after {
+            content: "Waiting for second player...";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .add-player-form {
+            text-align: center;
+            margin: 1rem auto;
+
+        }
+
+        .add-player-trigger {
+            background-color: #FFD500;
+            color: #003B8E;
+            padding: 12px 20px;
+            font-size: 1rem;
+            width: 60%;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-player-input-wrapper {
+            margin-top: 1rem;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.4s ease, max-height 0.4s ease;
+        }
+
+        .add-player-input-wrapper.show {
+            opacity: 1;
+            max-height: 100px;
+            width: 100%;
+            margin: 1rem;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        .add-player-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 2px solid #FFD500;
+            border-radius: 8px;
+            margin-right: 10px;
+            background-color: white;
+            color: #FFD500;
+        }
+
+        .stats.flash {
+            animation: flashText 0.5s ease;
+        }
+
+        @keyframes flashText {
+            0% {
+                color: #fff700;
+            }
+
+            50% {
+                color: white;
+            }
+
+            100% {
+                color: #fff700;
+            }
+        }
+
+        .submit-round {
+            background-color: #FFD700;
+            color: #003087;
+            font-weight: bold;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .submit-round:disabled {
+            background-color: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+        }
+
+        .submit-round.pulse {
+            animation: pulseBtn 1s infinite;
+        }
+
+        @keyframes pulseBtn {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.04);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        #add-player-wrapper.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        #add-player-wrapper {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+            width: 60%;
+        }
+
+        .shake {
+            animation: shake 0.4s ease;
+
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            50% {
+                transform: translateX(5px);
+            }
+
+            75% {
+                transform: translateX(-5px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .floating-phase-card {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: #FFD500;
+            color: #003B8E;
+            border: none;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 999;
+            transition: background 0.2s ease;
+        }
+
+
+
+
+
+        .floating-phase-card:hover {
+            transform: scale(1.1);
+            background-color: #ffc700;
+            bottom: 80px;
+
+
+        }
+
+        .floating-icon {
+            width: 28px;
+            height: 28px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="title-bar">
+
+        <div class="rainbow-slash">
+            <div class="slash red"></div>
+            <div class="slash blue"></div>
+            <div class="slash green"></div>
+            <div class="slash yellow"></div>
+        </div>
+        <div class="logo-image">
+            <img src="/static/phase10_logo.png" alt="Phase 10 Logo">
+        </div>
+        <div class="card-strip">
+            <div class="card red">1</div>
+            <div class="card blue">2</div>
+            <div class="card green">3</div>
+            <div class="card yellow">4</div>
+        </div>
+        <button class="floating-log-btn" onclick="toggleLog()" title="View Game Log">
+            💾
+        </button>
+        <!-- Floating Phase Card Button -->
+        <button class="floating-phase-card" id="view-phases-btn" onclick="showPhaseList()"
+            title="View Phases">📘</button>
+
+    </div>
+
+    {% if players|length < 10 %}<button type="button" id="add-player-trigger" class="add-player-trigger"
+        onclick="showAddInput()">➕ Add
+        Player</button>
+
+        <form id="add-player-form" action="/add_player" method="post" class="add-player-form"
+            onsubmit="return validateAddPlayer()">
+
+
+            <div id="add-player-wrapper" class="hidden">
+                <input id="add-player-input" type="text" name="name" placeholder="Player Name" class="add-player-input">
+                <button id="add-player-submit" type="submit" class="add-player-btn">Submit</button>
+            </div>
+        </form>
+
+        {% if players|length == 1 %}
+        <div id="start-warning" class="warning animate-warn">
+            ⚠️ You need at least 2 players to start the game.
+        </div>
+        {% endif %}
+        {% else %}
+        <p class="warning">⚠️ Maximum 10 players reached.</p>
+        {% endif %}
+
+        {% if players %}
+        <h2>Current Players</h2>
+        <div class="player-grid">
+            {% for player in players %}
+            <div class="player-card {% if players|length == 1 %}disabled{% endif %}">
+
+                <form id="remove-form-{{ loop.index0 }}" action="/remove_player" method="post" style="display:none;">
+                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                </form>
+                <button class="remove-btn"
+                    onclick="confirmRemove(event, '{{ player.name }}', 'remove-form-{{ loop.index0 }}')"
+                    title="Remove Player">×</button>
+
+                <form class="score-form" method="post">
+                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                    <input type="hidden" name="phase" value="{{ player.phase }}">
+
+
+                    <div class="avatar">{{ player.initials }}</div>
+                    <div class="player-info">
+                        <div class="name">{{ player.name }}</div>
+                        <div class="stats">
+                            Phase: {{ player.phase }} | Score: {{ player.score }}
+                        </div>
+
+
+                        <label class="custom-input">
+                            Round Score:
+                            <input type="number" name="score" min="0" placeholder="e.g. 25" class="score-input">
+                        </label>
+
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="completed" class="completed-checkbox phase-check">
+                            <span class="checkmark"></span>
+                            Completed Phase
+                        </label>
+
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="skipped" class="skipped-checkbox phase-check">
+                            <span class="checkmark"></span>
+                            Skipped
+                        </label>
+
+                        <button type="submit" class="submit-round" disabled>Submit Round</button>
+                    </div>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+
+        {% endif %}
+
+        {% if players %}
+        <form id="reset-form" action="/reset" method="post">
+            <button type="button" class="floating-reset-btn" onclick="confirmReset()" title="Start Over">
+                <img src="/static/startover-vector.png" alt="Start Over" class="startover-icon">
+            </button>
+
+        </form>
+
+
+
+
+
+        {% endif %}
+
+
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+        <!-- Include SweetAlert2 and JSConfetti -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+
+
+        <script>
+            let gameHistory = JSON.parse(localStorage.getItem("phase10-history")) || [];
+
+            function updateHistory(playerName, score, phase, completed, skipped) {
+
+
+                const entry = {
+                    player: playerName,
+                    score: score,
+                    phase: parseInt(phase),
+                    skipped,
+                    time: new Date().toLocaleTimeString()
+                };
+                gameHistory = gameHistory.filter(e => !(e.player === entry.player && e.phase === entry.phase));
+                gameHistory.push(entry);
+                localStorage.setItem("phase10-history", JSON.stringify(gameHistory));
+            }
+
+            function showAddInput() {
+
+                const wrapper = document.getElementById("add-player-input-wrapper");
+                wrapper.classList.add("show");
+
+                wrapper.classList.remove("hidden");
+                playSound('click');
+
+                const input = wrapper.querySelector("input");
+                if (input) input.focus();
+
+
+
+                // Optionally hide the trigger button after click
+                document.querySelector(".add-player-trigger").style.display = "none";
+
+            }
+
+            // 🔢 Animate score increasing
+            function animateScore(element, end) {
+                const match = element.textContent.match(/\d+/g);
+                let current = match ? parseInt(match[1]) : 0;
+                const duration = 600;
+                const frameRate = 30;
+                const steps = duration / (1000 / frameRate);
+                const increment = (end - current) / steps;
+                let step = 0;
+
+                const interval = setInterval(() => {
+                    current += increment;
+                    step++;
+                    if (step >= steps) {
+                        current = end;
+                        clearInterval(interval);
+                    }
+                    const phaseMatch = element.textContent.match(/Phase: (\d+)/);
+                    const phase = phaseMatch ? parseInt(phaseMatch[1]) : 1;
+                    element.textContent = `Phase: ${phase} | Score: ${Math.round(current)}`;
+                }, 1000 / frameRate);
+
+            }
+
+            // 🎉 Confetti
+            const jsConfetti = new JSConfetti();
+
+            function playCelebration() {
+                jsConfetti.addConfetti({
+                    emojis: ['🎉', '✨', '🎊', '💯'],
+                    emojiSize: 30,
+                    confettiNumber: 80,
+                });
+            }
+
+            // ✅ SweetAlert2 confirmation popup
+            function showSubmitConfirmation(playerName, phase, score) {
+                Swal.fire({
+                    title: `Round submitted!`,
+                    text: `${playerName} is now on Phase ${phase} | Score ${score}`,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    timer: 1800,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+
+
+
+            function toggleLog() {
+                const hasHistory = gameHistory.length > 0;
+
+                const entries = gameHistory.map(entry => `
+    <div style="margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px dashed #ccc;">
+      <strong>${entry.player}</strong> reached Phase ${entry.phase}, <strong>Score ${entry.score}</strong>
+      <br><span style="font-size: 0.8em; opacity: 0.6;">@ ${entry.time}</span>
+    </div>
+  `).join('');
+
+                Swal.fire({
+                    title: 'Phase Milestones',
+                    html: hasHistory ? entries : "<i>Nothing to show or clear.</i>",
+                    width: 600,
+                    showCancelButton: hasHistory, // ❌ Hide "Clear History" if empty
+                    cancelButtonText: '🧹 Clear History',
+                    confirmButtonText: 'Close',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                    scrollbarPadding: false
+                }).then(result => {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        localStorage.removeItem("phase10-history");
+                        gameHistory = [];
+                        Swal.fire({
+                            title: 'History cleared!',
+                            icon: 'success',
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+                        playSound('destroy');
+                    } else if (result.isConfirmed) {
+                        playSound('skip');
+                    }
+                    playSound('skip');
+                });
+
+                playSound('click'); // Opening the log
+            }
+
+
+            function playSound(type) {
+                let file = '';
+                if (type === 'skip') file = '/static/skip.mp3';
+                if (type === 'complete') file = '/static/success.mp3';
+                if (type === 'remove') file = '/static/skip.mp3';
+                if (type === 'denied') file = '/static/denied.mp3';
+                if (type === 'click') file = '/static/click.mp3';
+                if (type === 'destroy') file = '/static/destroy.mp3';
+                if (type === 'startover') file = '/static/startover.mp3';
+
+                if (file) new Audio(file).play();
+            }
+            function confirmReset() {
+                Swal.fire({
+                    title: 'Start Over?',
+                    text: "This will reset all scores and players.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, reset'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        playSound('startover');
+                        setTimeout(() => {
+                            document.getElementById('reset-form').submit();
+                        }, 400);
+                    } else { playSound('skip') }
+                });
+                playSound('click')
+
+            }
+
+
+
+
+            function playCelebration() {
+                confetti({
+                    particleCount: 300,
+                    spread: 100,
+                    origin: { y: 0.6 }
+                });
+                const audio = new Audio('/static/complete.mp3');
+                audio.play();
+            }
+
+
+
+            // function animateScore(element, finalScore) {
+            //     let current = 0;
+            //     const increment = Math.ceil(finalScore / 20);
+            //     function update() {
+            //         current += increment;
+            //         if (current >= finalScore) {
+            //             element.textContent = finalScore;
+            //         } else {
+            //             element.textContent = current;
+            //             requestAnimationFrame(update);
+            //         }
+            //     }
+            //     update();
+            // }
+
+            function showPhaseList() {
+                Swal.fire({
+                    title: '<span style="font-family: sans-serif; font-style: italic; font-weight: bold;">Phases </span>',
+                    html: `
+      <div style="background-color: #004aad; color: white; padding: 20px; border-radius: 10px; font-family: sans-serif;">
+        <span style="font-family: sans-serif; font-style: italic; font-weight: bold;">Phase -10- </span>
+        <ol style="text-align: left; line-height: 1.8; font-size: 1rem; padding-left: 1.2em;">
+          <li>2 sets of 3</li>
+          <li>1 set of 3 + 1 run of 4</li>
+          <li>1 set of 4 + 1 run of 4</li>
+          <li>1 run of 7</li>
+          <li>1 run of 8</li>
+          <li>1 run of 9</li>
+          <li>2 sets of 4</li>
+          <li>7 cards of 1 color</li>
+          <li>1 set of 5 + 1 set of 2</li>
+          <li>1 set of 5 + 1 set of 3</li>
+        </ol>
+        <div style="height: 6px; margin-top: 12px; border-radius: 4px;
+             background: linear-gradient(to right, red 25%, blue 25% 50%, green 50% 75%, gold 75%);">
+        </div>
+      </div>
+    `,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    customClass: {
+                        popup: 'swal-popup',
+                        closeButton: 'swal-close-button'
+                    },
+                    background: 'transparent',
+                    scrollbarPadding: false
+                }).then(result => {
+                    // if (result.dismiss === Swal.DismissReason.close) {
+                    //     playSound('skip'); // ✅ Add your closing sound here
+                    // }
+                    playSound('skip');
+                });
+
+                playSound('click'); // Optional if you're using sounds
+            }
+
+
+            function confirmRemove(event, playerName, formId) {
+                event.preventDefault();
+                playSound('click')
+                Swal.fire({
+                    title: `Remove ${playerName}?`,
+                    text: "This player will be removed from the game.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, remove'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        playSound('destroy');
+                        setTimeout(() => {
+                            document.getElementById(formId).submit();
+                        }, 400)
+                    } else { playSound('skip') }
+                });
+            }
+
+
+
+
+
+            document.addEventListener("DOMContentLoaded", () => {
+                // ADD PLAYER logic (same as before)
+                const triggerBtn = document.getElementById('add-player-trigger');
+                const addPlayerForm = document.getElementById('add-player-form');
+                const addPlayerInput = document.getElementById('add-player-input');
+                const addPlayerWrapper = document.getElementById('add-player-wrapper');
+                const addPlayerSubmit = document.getElementById('add-player-submit');
+
+                triggerBtn.addEventListener('click', () => {
+                    addPlayerWrapper.classList.remove('hidden');
+                    addPlayerInput.focus();
+                    triggerBtn.style.display = 'none';
+                    playSound('click');
+
+                });
+                let inactivityTimeout;
+
+                addPlayerInput.addEventListener('input', () => {
+                    clearTimeout(inactivityTimeout); // reset the timer on every key press
+
+                    inactivityTimeout = setTimeout(() => {
+                        if (addPlayerInput.value.trim()) {
+                            addPlayerWrapper.classList.add('hidden');
+                            triggerBtn.style.display = 'inline-block';
+                            addPlayerInput.value = '';
+                            playSound('skip'); // optional sound
+                        }
+                    }, 12000); // 3 seconds of inactivity
+                });
+                addPlayerInput.addEventListener('focus', () => {
+                    clearTimeout(inactivityTimeout);
+                    inactivityTimeout = setTimeout(() => {
+                        if (!addPlayerInput.value.trim()) {
+                            addPlayerWrapper.classList.add('hidden');
+                            triggerBtn.style.display = 'inline-block';
+                            addPlayerInput.value = '';
+                            playSound('skip');
+                        }
+                    }, 12000);
+
+                });
+
+
+
+
+
+
+
+
+                addPlayerForm.addEventListener('submit', (e) => {
+                    if (!addPlayerInput.value.trim()) {
+                        e.preventDefault();
+                        addPlayerInput.classList.add('shake');
+                        addPlayerSubmit.classList.add('shake');
+                        playSound('skip');
+                        setTimeout(() => {
+                            addPlayerInput.classList.remove('shake');
+                            addPlayerSubmit.classList.remove('shake');
+                        }, 500);
+                    } else {
+                        playSound('complete');
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!addPlayerWrapper.contains(e.target) && !triggerBtn.contains(e.target) && !addPlayerForm.contains(e.target)) {
+                        addPlayerWrapper.classList.add('hidden');
+                        triggerBtn.style.display = 'inline-block';
+                        addPlayerInput.value = '';
+                    }
+
+                });
+
+                // SCORE FORM logic
+                document.querySelectorAll('.score-form').forEach(form => {
+                    const card = form.querySelector('.player-card');
+                    const submitBtn = form.querySelector('.submit-round');
+
+                    function toggleSubmitButton() {
+                        const scoreInput = form.querySelector('.score-input');
+                        const completed = form.querySelector('input[name="completed"]');
+                        const skipped = form.querySelector('input[name="skipped"]');
+
+                        const hasScore = scoreInput && scoreInput.value.trim() !== '';
+                        const anyChecked = (completed && completed.checked) || (skipped && skipped.checked);
+                        const enable = hasScore || anyChecked;
+
+                        submitBtn.disabled = !enable;
+                        submitBtn.classList.toggle('pulse', enable);
+                    }
+
+                    const scoreInput = form.querySelector('.score-input');
+                    const completed = form.querySelector('input[name="completed"]');
+                    const skipped = form.querySelector('input[name="skipped"]');
+
+                    if (scoreInput) {
+                        scoreInput.addEventListener('input', toggleSubmitButton);
+                        scoreInput.addEventListener('focus', toggleSubmitButton);
+                    }
+
+                    if (card) {
+                        card.addEventListener('click', toggleSubmitButton);
+                    }
+
+                    [completed, skipped].forEach(checkbox => {
+                        if (checkbox) checkbox.addEventListener('change', toggleSubmitButton);
+                    });
+
+                    // Initial state
+                    toggleSubmitButton();
+
+                    form.addEventListener('submit', function (event) {
+                        event.preventDefault();
+
+                        if (document.querySelectorAll('.player-card').length < 2) {
+                            playSound('denied');
+                            const warn = document.getElementById('start-warning');
+                            if (warn) {
+                                warn.classList.remove('flash');
+                                void warn.offsetWidth;
+                                warn.classList.add('flash');
+                            }
+                            return;
+                        }
+
+                        const formData = new FormData(form);
+                        const data = Object.fromEntries(formData.entries());
+
+                        const playerName = form.querySelector('.name')?.innerText || "Player";
+                        const score = parseInt(data.score || 0);
+                        const completedChecked = completed?.checked;
+                        const skippedChecked = skipped?.checked;
+                        const statsDisplay = form.querySelector('.stats');
+
+                        fetch('/next_round', {
+                            method: 'POST',
+                            body: new URLSearchParams(data),
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                            .then(res => res.json())
+                            .then(response => {
+                                if (skippedChecked) playSound('skip');
+                                if (completedChecked) playSound('complete');
+
+                                if (statsDisplay && response.phase !== undefined && response.score !== undefined) {
+                                    statsDisplay.textContent = `Phase: ${response.phase} | Score: ${response.score}`;
+                                    statsDisplay.classList.add('flash');
+                                    setTimeout(() => statsDisplay.classList.remove('flash'), 500);
+                                    animateScore(statsDisplay, response.score);
+                                }
+
+                                updateHistory(playerName, score, response.phase, completedChecked, skippedChecked);
+                                showSubmitConfirmation(playerName, response.phase, response.score);
+
+                                if (completedChecked && response.phase >= 10) playCelebration();
+                                if (response.winner && response.redirect) {
+                                    window.location.href = response.redirect;
+                                }
+
+                                if (response.winner) {
+                                    setTimeout(() => window.location.href = "/winner", 400);
+
+
+                                }
+
+
+                                form.reset();
+                                toggleSubmitButton();
+                            });
+                    });
+                });
+            });
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </script>
+
+
+
+
+
+
+
+</body>
+
+</html>

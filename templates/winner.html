@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Phase 10 Scoreboard</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <meta property="og:title" content="Phase 10 Scoreboard">
+    <meta property="og:description" content="Keep score with style. Confetti. Sound. Winner animations.">
+    <meta property="og:image" content="/static/preview.png">
+    <meta property="og:url" content="https://yourdomain.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Phase 10 Scoreboard">
+    <meta name="twitter:description" content="Track and celebrate your Phase 10 game like never before.">
+    <meta name="twitter:image" content="/static/preview.png">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #003B8E;
+            color: white;
+            text-align: center;
+        }
+
+        .restart-btn,
+        .log-toggle-btn {
+            margin: 2rem auto 1rem;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: #FFD500;
+            color: #003B8E;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .history-container {
+            max-width: 600px;
+            margin: auto;
+            background: #002e70;
+            border: 2px solid #FFD500;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: left;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #FFD50055;
+            padding-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .winner-title {
+            font-size: 3rem;
+            margin-top: 100px;
+            animation: bounce 1.5s infinite;
+            text-shadow: 0 0 10px #FFD500, 0 0 20px #FFD500aa;
+        }
+
+        .score.pulse {
+            font-size: 1.5rem;
+            margin: 1rem 0 2rem;
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                text-shadow: 0 0 5px #FFD500;
+            }
+
+            50% {
+                text-shadow: 0 0 20px #FFD500aa;
+            }
+
+            100% {
+                text-shadow: 0 0 5px #FFD500;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    {% if winner %}
+    <h1 class="winner-title">🏆 {{ winner.name|capitalize }} Wins! 🏆</h1>
+
+    <div class="score pulse">Final Score: {{ winner.score }}</div>
+
+    <form id="reset-form" action="/reset" method="post">
+        <button type="submit" class="restart-btn">Play Again</button>
+    </form>
+
+    {% else %}
+    <h1>No winner yet</h1>
+    {% endif %}
+
+
+
+    <script>
+        // document.getElementById("reset-form").addEventListener("submit", function () {
+        //     localStorage.clear(); // or just localStorage.removeItem('phase10-history')
+        // });
+        const resetForm = document.getElementById("reset-form");
+        resetForm.addEventListener("submit", function () {
+            localStorage.removeItem("phase10-history");
+        });
+
+        function renderHistory() {
+            const container = document.getElementById("history-log");
+            if (!container) return;
+
+            container.innerHTML = gameHistory.map(entry => `
+        <div class="log-entry">
+          <strong>${entry.player}</strong>: +${entry.score} pts, Phase ${entry.phase} 
+          ${entry.completed ? "✅" : ""} ${entry.skipped ? "⏭️" : ""} 
+          <span style="opacity: 0.6; font-size: 0.8em;">@ ${entry.time}</span>
+        </div>
+      `).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toggleLog() {
+            const container = document.getElementById("history-container");
+            container.classList.toggle("hidden");
+        }
+        function playSound(type) {
+            let file = '';
+            if (type === 'skip') file = '/static/skip.mp3';
+            if (type === 'complete') file = '/static/success.mp3';
+            if (type === 'remove') file = '/static/skip.mp3';
+            if (type === 'denied') file = '/static/denied.mp3';
+            if (type === 'click') file = '/static/click.mp3';
+            if (type === 'destroy') file = '/static/destroy.mp3';
+            if (type === 'startover') file = '/static/startover.mp3';
+            if (type === 'win') file = '/static/win.mp3';
+
+            if (file) new Audio(file).play();
+        }
+
+        function playCelebration() {
+            confetti({
+                particleCount: 300,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+
+        }
+        playCelebration();
+        playSound('win');
+
+        function confirmRemove(event, playerName, formId) {
+            event.preventDefault();
+            Swal.fire({
+                title: `Remove ${playerName}?`,
+                text: "This player will be removed from the game.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, remove'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", renderHistory);
+    </script>
+</body>
+
+</html>
