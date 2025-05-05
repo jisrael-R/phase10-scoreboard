@@ -552,7 +552,7 @@
             border-radius: 8px;
             margin-right: 10px;
             background-color: white;
-            color: #FFD500;
+            color: #002e70;
         }
 
         .stats.flash {
@@ -993,20 +993,7 @@
 
 
 
-            // function animateScore(element, finalScore) {
-            //     let current = 0;
-            //     const increment = Math.ceil(finalScore / 20);
-            //     function update() {
-            //         current += increment;
-            //         if (current >= finalScore) {
-            //             element.textContent = finalScore;
-            //         } else {
-            //             element.textContent = current;
-            //             requestAnimationFrame(update);
-            //         }
-            //     }
-            //     update();
-            // }
+
 
             function showPhaseList() {
                 Swal.fire({
@@ -1231,14 +1218,13 @@
 
                                 if (completedChecked && response.phase >= 10) playCelebration();
                                 if (response.winner && response.redirect) {
-                                    window.location.href = response.redirect;
+                                    console.log("🎯 Redirecting to:", response.redirect);
+                                    setTimeout(() => {
+                                        window.location.href = response.redirect;
+                                    }, 400);
                                 }
 
-                                if (response.winner) {
-                                    setTimeout(() => window.location.href = "/winner", 400);
 
-
-                                }
 
 
                                 form.reset();

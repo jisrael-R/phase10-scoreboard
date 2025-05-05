@@ -46,14 +46,12 @@ def get_winner():
 
 @app.route('/winner')
 def winner():
-    if not players:
+    winner_data = session.get('winner')
+    if not winner_data:
         return redirect(url_for('index'))
 
-    winning_player = next((p for p in players if p.phase == 10), None)
-    if not winning_player:
-        return redirect(url_for('index'))
+    return render_template("winner.html", winner=winner_data)
 
-    return render_template("winner.html", winner=winning_player)
 
 
 
@@ -71,37 +69,37 @@ def next_round():
     if 0 <= i < len(players):
         player = players[i]
 
-        # Parse score safely
+        # Parse and apply score
         score_raw = request.form.get('score', '0')
         try:
             score = int(score_raw.strip()) if score_raw.strip() else 0
         except ValueError:
             score = 0
-
-        # Always apply score
         player.score += score
 
-        # Parse checkbox inputs
+        # Get checkbox inputs
         completed = request.form.get('completed') == 'on'
         skipped = request.form.get('skipped') == 'on'
-
-        # Update phase only if completed and NOT skipped
-        if completed and not skipped:
-            player.phase += 1
-
-        # Mark if skipped (optional)
         player.skipped = skipped
 
-        # Handle winner logic
-        if completed and player.phase == 10:
-            session['winner'] = {
-                'name': player.name,
-                'score': player.score
-            }
-            return jsonify(success=True, winner=True, redirect=url_for('winner'))
+        # ✅ Advance phase if completed and not skipped
+        if completed and not skipped:
+            player.phase += 1
+            print(f"🔍 {player.name} advanced to Phase {player.phase}")
 
+            # ✅ Declare winner if they just finished Phase 10
+            if player.phase > 10:
+                print(f"🎉 WINNER: {player.name} with score {player.score}")
+                session['winner'] = {
+                    'name': player.name,
+                    'score': player.score
+                }
+                return jsonify(success=True, winner=True, redirect=url_for('winner'))
+
+        # ✅ Return updated score and phase
         return jsonify(success=True, score=player.score, phase=player.phase)
 
+    # ❌ Invalid index fallback
     return jsonify(success=False, error="Player not found"), 404
 
 
